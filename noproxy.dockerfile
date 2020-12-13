@@ -49,8 +49,8 @@ RUN apt-get update && apt-get install -y \
         ca-certificates \
         wget \
         lsb-release \
-        gnupg
-
+        gnupg \
+        gnupg2
 RUN sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
@@ -62,7 +62,13 @@ RUN apt-get update && apt-get install -y \
         python3-rosinstall-generator \
         python3-wstool \
         build-essential
+
 RUN rosdep init
+
+RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+RUN sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
+RUN apt-get update && apt-get install -y \
+        ros-foxy-desktop
 
 USER root
 RUN apt-get clean && \
