@@ -1,5 +1,5 @@
 # ROS on M1 Mac Docker (ARM64)
- This docker file makes the container of ROS Melodic on Ubuntu 18.04 LTS for M1 Mac (ARM64)
+ This docker file makes the container of ROS Noetic on Ubuntu 20.04 LTS for M1 Mac (ARM64)
 ## Limitation
  Rviz and Gazebo don't work. (because of OpenGL Problems)
 ## How to use

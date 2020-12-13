@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ARG UID=9001
 ARG GID=9001
@@ -20,7 +20,8 @@ RUN useradd -u $UID -m $USERNAME && \
         groupmod --gid $GID $USERNAME && \
         chown -R $USERNAME:$USERNAME $HOME && \
         chmod 666 /dev/null && \
-        chmod 666 /dev/urandom
+        chmod 666 /dev/urandom && \
+        rm /etc/apt/apt.conf.d/docker-gzip-indexes
 
 # install package
 ENV DEBIAN_FRONTEND=noninteractive
@@ -43,7 +44,6 @@ RUN apt-get update && apt-get install -y \
         emacs \
         ssh \
         rsync \
-        python-pip \
         python3-pip \
         sed \
         ca-certificates \
@@ -54,16 +54,14 @@ RUN apt-get update && apt-get install -y \
 RUN sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+RUN sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
 RUN apt-get update && apt-get install -y \
-        ros-melodic-desktop-full \
-        python-rosdep \
-        python-rosinstall \
-        python-rosinstall-generator \
-        python-wstool \
-        build-essential \
-        python-rosdep
-
+        ros-noetic-desktop-full \
+        python3-rosdep \
+        python3-rosinstall \
+        python3-rosinstall-generator \
+        python3-wstool \
+        build-essential
 RUN rosdep init
 
 USER root

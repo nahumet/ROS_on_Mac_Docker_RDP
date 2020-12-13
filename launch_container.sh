@@ -2,7 +2,7 @@
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
 
 
-NAME_IMAGE='bionic_ws'
+NAME_IMAGE='focal_ws'
 
 if [ ! "$(docker image ls -q ${NAME_IMAGE})" ]; then
 	if [ ! $# -ne 1 ]; then
@@ -21,8 +21,8 @@ if [ ! "$(docker image ls -q ${NAME_IMAGE})" ]; then
 else
 	if [ ! $# -ne 1 ]; then
 		if [ "commit" = $1 ]; then
-			docker commit bionic_docker bionic_ws:latest
-			CONTAINER_ID=$(docker ps -a -f name=bionic_docker --format "{{.ID}}")
+			docker commit focal_docker focal_ws:latest
+			CONTAINER_ID=$(docker ps -a -f name=focal_docker --format "{{.ID}}")
 			docker rm $CONTAINER_ID
 			exit 0
 		else
@@ -40,7 +40,7 @@ fi
 chmod a+r $XAUTH
 
 DOCKER_OPT=""
-DOCKER_NAME="bionic_docker"
+DOCKER_NAME="focal_docker"
 DOCKER_WORK_DIR="/home/${USER}"
 MAC_WORK_DIR="/Users/${USER}"
 DISPLAY=$(hostname):0
@@ -60,24 +60,24 @@ DOCKER_OPT="${DOCKER_OPT} \
 		
 ## Allow X11 Connection
 xhost +local:`hostname`-Docker
-CONTAINER_ID=$(docker ps -a -f name=bionic_docker --format "{{.ID}}")
+CONTAINER_ID=$(docker ps -a -f name=focal_docker --format "{{.ID}}")
 if [ ! "$CONTAINER_ID" ]; then
     docker run -u root \
 		--volume=/dev:/dev:rw \
 		--name=${DOCKER_NAME} \
-		bionic_ws:latest \
+		focal_ws:latest \
 		chmod 666 /dev/null
-	docker commit bionic_docker bionic_ws:latest
-	CONTAINER_ID=$(docker ps -a -f name=bionic_docker --format "{{.ID}}")
+	docker commit focal_docker focal_ws:latest
+	CONTAINER_ID=$(docker ps -a -f name=focal_docker --format "{{.ID}}")
 	docker rm $CONTAINER_ID
 
     docker run -u root \
 		--volume=/dev:/dev:rw \
 		--name=${DOCKER_NAME} \
-		bionic_ws:latest \
+		focal_ws:latest \
 		chmod 666 /dev/urandom
-	docker commit bionic_docker bionic_ws:latest
-	CONTAINER_ID=$(docker ps -a -f name=bionic_docker --format "{{.ID}}")
+	docker commit focal_docker focal_ws:latest
+	CONTAINER_ID=$(docker ps -a -f name=focal_docker --format "{{.ID}}")
 	docker rm $CONTAINER_ID
 
 	docker run ${DOCKER_OPT} \
@@ -88,7 +88,7 @@ if [ ! "$CONTAINER_ID" ]; then
 		--env=TERM=xterm-256color \
 		--net=host \
 		--name=${DOCKER_NAME} \
-		bionic_ws:latest \
+		focal_ws:latest \
 		bash
 else
 	docker start $CONTAINER_ID
