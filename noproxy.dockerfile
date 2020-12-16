@@ -147,6 +147,9 @@ RUN { \
       echo "user=xrdp"; \
     } > /etc/supervisor/xrdp.conf
 
+USER $USERNAME
+RUN rm -rf ~/.cache
+USER root
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
