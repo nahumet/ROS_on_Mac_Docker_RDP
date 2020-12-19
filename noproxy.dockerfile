@@ -75,20 +75,6 @@ RUN apt-get update && apt-get install -y \
         python3-rosinstall-generator \
         python3-wstool
 
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      xrdp-pulseaudio-installer \
-      net-tools \
-    && apt-get clean \
-    && rm -rf /var/cache/apt/archives/* \
-    && rm -rf /var/lib/apt/lists/* \
-# Apply a patch
-    && sed -i -E \
-      's@^dget ".*pulseaudio.*\.dsc"$@\dget -u "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/pulseaudio/$pulseaudio_version/pulseaudio_$(echo $pulseaudio_version | sed "s/^.*://").dsc"@' \
-      /usr/sbin/xrdp-build-pulse-modules \
-    && /usr/sbin/xrdp-build-pulse-modules
-
-
 RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 RUN sudo sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list'
 RUN apt-get update && apt-get install -y \
