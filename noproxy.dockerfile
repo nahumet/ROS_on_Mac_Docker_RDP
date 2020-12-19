@@ -7,6 +7,7 @@ ARG HOSTNAME=docker
 ARG NEW_HOSTNAME=${HOSTNAME}-Docker
 ARG USERNAME=$UNAME
 ARG HOME=/home/$USERNAME
+ARG LOCALE="US"
 
 
 RUN useradd -u $UID -m $USERNAME && \
@@ -74,37 +75,56 @@ RUN apt-get update && apt-get install -y \
         python3-wstool \
         htop
 
-RUN apt-get clean \
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+      xrdp-pulseaudio-installer \
+      net-tools \
+    && apt-get clean \
     && rm -rf /var/cache/apt/archives/* \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+# Apply a patch
+    && sed -i -E \
+      's@^dget ".*pulseaudio.*\.dsc"$@\dget -u "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/pulseaudio/$pulseaudio_version/pulseaudio_$(echo $pulseaudio_version | sed "s/^.*://").dsc"@' \
+      /usr/sbin/xrdp-build-pulse-modules \
+    && /usr/sbin/xrdp-build-pulse-modules
+
 
 
 RUN rosdep init
-USER $USERNAME
-RUN mkdir -p ~/.config/autostart/
-RUN { \
-      echo '[Desktop Entry]'; \
-      echo 'Type=Application'; \
-      echo 'Name=SetJPKeyboard'; \
-      echo 'Exec=setxkbmap -layout jp'; \
-      echo 'OnlyShowIn=LXDE'; \
-    } > ~/.config/autostart/setxkbmap.desktop
 
+USER $USERNAME
 RUN rosdep update
 USER root
 
+RUN if [ "${LOCALE}" = "JP" ]; then \
+    # mkdir -p ~/.config/autostart/ \
+    # &&  \
+    { \
+    echo '[Desktop Entry]'; \
+    echo 'Type=Application'; \
+    echo 'Name=SetJPKeyboard'; \
+    echo 'Exec=setxkbmap -layout jp'; \
+    echo 'OnlyShowIn=LXDE'; \
+    # } > ~/.config/autostart/setxkbmap.desktop; \
+    } > /etc/xdg/autostart/setxkbmap.desktop; \
+fi
+
 # Set locale
-RUN cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
-    && echo 'Asia/Tokyo' > /etc/timezone
-RUN locale-gen ja_JP.UTF-8 \
-    && echo 'LC_ALL=ja_JP.UTF-8' > /etc/default/locale \
-    && echo 'LANG=ja_JP.UTF-8' >> /etc/default/locale
-ENV LANG=ja_JP.UTF-8 \
-    LANGUAGE=ja_JP:ja \
-    LC_ALL=ja_JP.UTF-8
+RUN if [ "${LOCALE}" = "JP" ]; then \
+        cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
+        && echo 'Asia/Tokyo' > /etc/timezone \
+        && locale-gen ja_JP.UTF-8 \
+        && echo 'LC_ALL=ja_JP.UTF-8' > /etc/default/locale \
+        && echo 'LANG=ja_JP.UTF-8' >> /etc/default/locale\
+        && LANG=ja_JP.UTF-8 \
+        && LANGUAGE=ja_JP:ja \
+        && LC_ALL=ja_JP.UTF-8; \
+fi
 
 # RUN mkdir -p /etc/X11/xorg.conf.d/
-# RUN { \
+
+# RUN if [ "${LOCALE}" = "JP" ]; then \
+# { \
 #       echo 'Section "InputClass"'; \
 #       echo '        Identifier "system-keyboard"'; \
 #       echo '        MatchIsKeyboard "on"'; \
@@ -112,16 +132,20 @@ ENV LANG=ja_JP.UTF-8 \
 #       echo '        Option "XkbModel" "jp106"'; \
 #       echo '        Option "XkbOptions" "grp:alt_shift_toggle"'; \
 #       echo 'EndSection'; \
-#     } > /etc/X11/xorg.conf.d/00-keyboard.conf
+#     } > /etc/X11/xorg.conf.d/00-keyboard.conf; \
+# fi
 
-# RUN echo '# KEYBOARD CONFIGURATION FILE' > /etc/default/keyboard
-# RUN echo '# Consult the keyboard(5) manual page.' >> /etc/default/keyboard
-# RUN echo 'XKBMODEL="pc109"' >> /etc/default/keyboard
-# RUN echo 'XKBLAYOUT="jp"' >> /etc/default/keyboard
-# RUN echo 'XKBVARIANT=""' >> /etc/default/keyboard
-# RUN echo 'XKBOPTIONS=""' >> /etc/default/keyboard
-# RUN echo 'BACKSPACE="guess"' >> /etc/default/keyboard
-
+# RUN if [ "${LOCALE}" = "JP" ]; then \
+# { \
+#       echo '# KEYBOARD CONFIGURATION FILE'; \
+#       echo '# Consult the keyboard(5) manual page.'; \
+#       echo 'XKBMODEL="pc109"'; \
+#       echo 'XKBLAYOUT="jp"'; \
+#       echo 'XKBVARIANT=""'; \
+#       echo 'XKBOPTIONS=""'; \
+#       echo 'BACKSPACE="guess"'; \
+#     } > /etc/default/keyboard; \
+# fi
 
 # Expose RDP port
 EXPOSE 3389
@@ -150,6 +174,7 @@ RUN { \
 USER $USERNAME
 RUN rm -rf ~/.cache
 USER root
+RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.org
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
