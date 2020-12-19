@@ -90,8 +90,8 @@ if [ ! "$CONTAINER_ID" ]; then
 				focal_ws:latest \
 				bash -c docker-entrypoint.sh
 				
-			docker commit bionic_docker bionic_ws:latest
-			CONTAINER_ID=$(docker ps -a -f name=bionic_docker --format "{{.ID}}")
+			docker commit focal_docker focal_ws:latest
+			CONTAINER_ID=$(docker ps -a -f name=focal_docker --format "{{.ID}}")
 			docker rm $CONTAINER_ID
 		else
 			docker run ${DOCKER_OPT} \
@@ -131,8 +131,8 @@ else
 				focal_ws:latest \
 				bash -c docker-entrypoint.sh
 
-			docker commit bionic_docker bionic_ws:latest
-			CONTAINER_ID=$(docker ps -a -f name=bionic_docker --format "{{.ID}}")
+			docker commit focal_docker focal_ws:latest
+			CONTAINER_ID=$(docker ps -a -f name=focal_docker --format "{{.ID}}")
 			docker rm $CONTAINER_ID
 		else
 			docker start $CONTAINER_ID
