@@ -83,14 +83,6 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p ~/.config/autostart/
-RUN { \
-      echo '[Desktop Entry]'; \
-      echo 'Type=Application'; \
-      echo 'Name=SetJPKeyboard'; \
-      echo 'Exec=setxkbmap -layout jp'; \
-      echo 'OnlyShowIn=LXDE'; \
-    } > ~/.config/autostart/setxkbmap.desktop
 RUN rosdep init
 
 USER $USERNAME
@@ -177,6 +169,7 @@ RUN { \
 
 USER $USERNAME
 RUN rm -rf ~/.cache
+RUN rm -rf ~/.config
 USER root
 RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.org
 
