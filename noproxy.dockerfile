@@ -108,14 +108,16 @@ fi
 # Set locale
 RUN if [ "${LOCALE}" = "JP" ]; then \
         cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime \
-        && echo 'Asia/Tokyo' > /etc/timezone \
-        && locale-gen ja_JP.UTF-8 \
-        && echo 'LC_ALL=ja_JP.UTF-8' > /etc/default/locale \
-        && echo 'LANG=ja_JP.UTF-8' >> /etc/default/locale\
-        && LANG=ja_JP.UTF-8 \
-        && LANGUAGE=ja_JP:ja \
-        && LC_ALL=ja_JP.UTF-8; \
+        && echo 'Asia/Tokyo' > /etc/timezone; \
 fi
+# RUN if [ "${LOCALE}" = "JP" ]; then \
+#         locale-gen ja_JP.UTF-8 \
+#         && echo 'LC_ALL=ja_JP.UTF-8' > /etc/default/locale \
+#         && echo 'LANG=ja_JP.UTF-8' >> /etc/default/locale\
+#         && LANG=ja_JP.UTF-8 \
+#         && LANGUAGE=ja_JP:ja \
+#         && LC_ALL=ja_JP.UTF-8; \
+# fi
 
 # RUN mkdir -p /etc/X11/xorg.conf.d/
 
@@ -142,6 +144,14 @@ fi
 #       echo 'BACKSPACE="guess"'; \
 #     } > /etc/default/keyboard; \
 # fi
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+      ubuntu-wallpapers \
+      net-tools \
+    && apt-get clean \
+    && rm -rf /var/cache/apt/archives/* \
+    && rm -rf /var/lib/apt/lists/* 
 
 # Expose RDP port
 EXPOSE 3389
@@ -172,6 +182,12 @@ RUN rm -rf ~/.cache
 RUN rm -rf ~/.config
 USER root
 RUN mv /usr/bin/lxpolkit /usr/bin/lxpolkit.org
+
+RUN { \
+      echo '#DPkg::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };'; \
+      echo '#APT::Update::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };'; \
+      echo '#Dir::Cache::pkgcache ""; Dir::Cache::srcpkgcache "";'; \
+    } > /etc/apt/apt.conf.d/docker-clean
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
