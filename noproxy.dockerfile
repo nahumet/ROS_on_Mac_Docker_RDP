@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ethzrobotx/smb_docker
 ARG UID=9001
 ARG GID=9001
 ARG UNAME=ubuntu
@@ -13,7 +13,7 @@ RUN useradd -u $UID -m $USERNAME && \
         echo "$USERNAME:$USERNAME" | chpasswd && \
         usermod --shell /bin/bash $USERNAME && \
         usermod -aG sudo $USERNAME && \
-        mkdir /etc/sudoers.d && \
+        mkdir -p /etc/sudoers.d && \
         echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/$USERNAME && \
         chmod 0440 /etc/sudoers.d/$USERNAME && \
         usermod  --uid $UID $USERNAME && \
@@ -61,33 +61,33 @@ RUN echo 'path-include=/usr/share/locale/ja/LC_MESSAGES/*.mo' > /etc/dpkg/dpkg.c
         lsb-release \
         gnupg
 
-RUN sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+# RUN sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
 
-RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-RUN apt-get update && apt-get install -y \
-        ros-melodic-desktop-full \
-        python-rosdep \
-        python-rosinstall \
-        python-rosinstall-generator \
-        python-wstool \
-        htop
+# RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+# RUN apt-get update && apt-get install -y \
+#         ros-melodic-desktop-full \
+#         python-rosdep \
+#         python-rosinstall \
+#         python-rosinstall-generator \
+#         python-wstool \
+#         htop
 
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-      xrdp-pulseaudio-installer \
-      net-tools \
-    && apt-get clean \
-    && rm -rf /var/cache/apt/archives/* \
-    && rm -rf /var/lib/apt/lists/* \
+# RUN apt-get update \
+#     && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+#       xrdp-pulseaudio-installer \
+#       net-tools \
+#     && apt-get clean \
+#     && rm -rf /var/cache/apt/archives/* \
+#     && rm -rf /var/lib/apt/lists/* \
 # Apply a patch
-    && sed -i -E \
-      's@^dget ".*pulseaudio.*\.dsc"$@\dget -u "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/pulseaudio/$pulseaudio_version/pulseaudio_$(echo $pulseaudio_version | sed "s/^.*://").dsc"@' \
-      /usr/sbin/xrdp-build-pulse-modules \
-    && /usr/sbin/xrdp-build-pulse-modules
+    # && sed -i -E \
+    #   's@^dget ".*pulseaudio.*\.dsc"$@\dget -u "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/pulseaudio/$pulseaudio_version/pulseaudio_$(echo $pulseaudio_version | sed "s/^.*://").dsc"@' \
+    #   /usr/sbin/xrdp-build-pulse-modules \
+    # && /usr/sbin/xrdp-build-pulse-modules
 
 
 
-RUN rosdep init
+# RUN rosdep init
 
 USER $USERNAME
 RUN rosdep update
@@ -151,7 +151,7 @@ RUN apt-get update \
       ubuntu-wallpapers \
     && apt-get clean \
     && rm -rf /var/cache/apt/archives/* \
-    && rm -rf /var/lib/apt/lists/* 
+    && rm -rf /var/lib/apt/lists/*
 
 # Expose RDP port
 EXPOSE 3389

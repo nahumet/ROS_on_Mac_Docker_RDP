@@ -2,7 +2,7 @@
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
 
 
-NAME_IMAGE='bionic_ws'
+NAME_IMAGE='smb_docker'
 
 if [ ! "$(docker image ls -q ${NAME_IMAGE})" ]; then
 	if [ ! $# -ne 1 ]; then
@@ -36,8 +36,8 @@ if [ ! "$(docker image ls -q ${NAME_IMAGE})" ]; then
 else
 	if [ ! $# -ne 1 ]; then
 		if [ "commit" = $1 ]; then
-			docker commit bionic_docker bionic_ws:latest
-			CONTAINER_ID=$(docker ps -a -f name=bionic_docker --format "{{.ID}}")
+			docker commit smb_docker smb_docker:latest
+			CONTAINER_ID=$(docker ps -a -f name=smb_docker --format "{{.ID}}")
 			docker rm $CONTAINER_ID
 			exit 0
 		else
@@ -55,7 +55,7 @@ fi
 chmod a+r $XAUTH
 
 DOCKER_OPT=""
-DOCKER_NAME="bionic_docker"
+DOCKER_NAME="smb_docker"
 DOCKER_WORK_DIR="/home/${USER}"
 MAC_WORK_DIR="/Users/${USER}"
 DISPLAY=$(hostname):0
@@ -73,11 +73,11 @@ DOCKER_OPT="${DOCKER_OPT} \
         --add-host Docker-`hostname`:127.0.1.1 \
 		-p 3389:3389 \
 		-e PASSWD=${USER}"
-		
-		
+
+
 ## Allow X11 Connection
 xhost +local:Docker-`hostname`
-CONTAINER_ID=$(docker ps -a -f name=bionic_docker --format "{{.ID}}")
+CONTAINER_ID=$(docker ps -a -f name=smb_docker --format "{{.ID}}")
 if [ ! "$CONTAINER_ID" ]; then
 	if [ ! $# -ne 1 ]; then
 		if [ "xrdp" = $1 ]; then
@@ -86,12 +86,11 @@ if [ ! "$CONTAINER_ID" ]; then
 				-it \
 				--shm-size=1gb \
 				--name=${DOCKER_NAME} \
-				--net=host \
-				bionic_ws:latest \
+				smb_docker:latest \
 				bash -c docker-entrypoint.sh
-				
-			docker commit bionic_docker bionic_ws:latest
-			CONTAINER_ID=$(docker ps -a -f name=bionic_docker --format "{{.ID}}")
+
+			docker commit smb_docker smb_docker:latest
+			CONTAINER_ID=$(docker ps -a -f name=smb_docker --format "{{.ID}}")
 			docker rm $CONTAINER_ID
 		else
 			docker run ${DOCKER_OPT} \
@@ -99,9 +98,8 @@ if [ ! "$CONTAINER_ID" ]; then
 				--volume=$MAC_WORK_DIR/.Xauthority:$DOCKER_WORK_DIR/.Xauthority:rw \
 				--shm-size=1gb \
 				--env=TERM=xterm-256color \
-				--net=host \
 				--name=${DOCKER_NAME} \
-				bionic_ws:latest \
+				smb_docker:latest \
 				bash
 		fi
 	else
@@ -110,16 +108,15 @@ if [ ! "$CONTAINER_ID" ]; then
 			--volume=$MAC_WORK_DIR/.Xauthority:$DOCKER_WORK_DIR/.Xauthority:rw \
 			--shm-size=1gb \
 			--env=TERM=xterm-256color \
-			--net=host \
 			--name=${DOCKER_NAME} \
-			bionic_ws:latest \
+			smb_docker:latest \
 			bash
 	fi
 else
 	if [ ! $# -ne 1 ]; then
 		if [ "xrdp" = $1 ]; then
-			docker commit bionic_docker bionic_ws:latest
-			CONTAINER_ID=$(docker ps -a -f name=bionic_docker --format "{{.ID}}")
+			docker commit smb_docker smb_docker:latest
+			CONTAINER_ID=$(docker ps -a -f name=smb_docker --format "{{.ID}}")
 			docker rm $CONTAINER_ID
 
 		    echo "Remote Desktop Mode"
@@ -127,12 +124,11 @@ else
 				-it \
 				--shm-size=1gb \
 				--name=${DOCKER_NAME} \
-				--net=host \
-				bionic_ws:latest \
+				smb_docker:latest \
 				bash -c docker-entrypoint.sh
 
-			docker commit bionic_docker bionic_ws:latest
-			CONTAINER_ID=$(docker ps -a -f name=bionic_docker --format "{{.ID}}")
+			docker commit smb_docker smb_docker:latest
+			CONTAINER_ID=$(docker ps -a -f name=smb_docker --format "{{.ID}}")
 			docker rm $CONTAINER_ID
 		else
 			docker start $CONTAINER_ID
